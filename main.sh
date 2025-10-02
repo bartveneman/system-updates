@@ -5,6 +5,7 @@ set -euo pipefail
 echo "==> Updating Homebrew"
 brew update
 brew upgrade
+brew upgrade --cask
 brew cleanup
 
 echo "==> Updating global npm and packages"
