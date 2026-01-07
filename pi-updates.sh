@@ -140,6 +140,20 @@ else
     print_warning "SSH configuration not found"
 fi
 
+# Check if unattended-upgrades is enabled
+print_step "Checking automatic security updates..."
+if systemctl status unattended-upgrades >/dev/null 2>&1; then
+    if systemctl is-active --quiet unattended-upgrades; then
+        print_success "Automatic security updates are enabled and running"
+    else
+        print_warning "Unattended-upgrades service is installed but not active"
+        print_warning "To enable it, run: sudo systemctl enable --now unattended-upgrades"
+    fi
+else
+    print_warning "Unattended-upgrades service is not installed or not configured"
+    print_warning "To install, run: sudo apt-get install unattended-upgrades"
+fi
+
 # System information
 print_step "Gathering system information..."
 echo "" >> "$LOG_FILE"
