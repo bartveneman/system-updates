@@ -53,7 +53,7 @@ echo "========================================" >> "$LOG_FILE"
 print_step "Starting Raspberry Pi monthly maintenance..."
 echo ""
 
-# 1. Update package lists
+# Update package lists
 print_step "Updating package lists..."
 if apt-get update 2>&1 | tee -a "$LOG_FILE"; then
     print_success "Package lists updated"
@@ -62,7 +62,7 @@ else
     exit 1
 fi
 
-# 2. Install available updates
+# Install available updates
 print_step "Installing system updates..."
 if apt-get upgrade -y 2>&1 | tee -a "$LOG_FILE"; then
     print_success "System upgraded"
@@ -70,7 +70,7 @@ else
     print_warning "Some packages may not have been upgraded"
 fi
 
-# 4. Install distribution upgrade (optional - removes old packages)
+# Install distribution upgrade (optional - removes old packages)
 print_step "Installing distribution upgrades (full-upgrade)..."
 if apt-get full-upgrade -y 2>&1 | tee -a "$LOG_FILE"; then
     print_success "Full distribution upgrade completed"
@@ -78,7 +78,7 @@ else
     print_warning "Some distribution upgrades may have failed"
 fi
 
-# 5. Clean up old packages
+# Clean up old packages
 print_step "Cleaning up old packages..."
 if apt-get autoremove -y 2>&1 | tee -a "$LOG_FILE"; then
     print_success "Obsolete packages removed"
@@ -90,7 +90,7 @@ if apt-get autoclean -y 2>&1 | tee -a "$LOG_FILE"; then
     print_success "Package cache cleaned"
 fi
 
-# 6. Update Pi-hole
+# Update Pi-hole
 print_step "Updating Pi-hole..."
 if command -v pihole &> /dev/null; then
     if pihole -up 2>&1 | tee -a "$LOG_FILE"; then
@@ -102,16 +102,7 @@ else
     print_warning "Pi-hole not installed"
 fi
 
-# 7. Check for held packages
-print_step "Checking for held packages..."
-HELD_PACKAGES=$(apt-mark showhold)
-if [ -z "$HELD_PACKAGES" ]; then
-    print_success "No packages on hold"
-else
-    print_warning "Packages on hold: $HELD_PACKAGES"
-fi
-
-# 8. Disk space check
+# Disk space check
 print_step "Checking disk space..."
 DISK_USAGE=$(df -h / | awk 'NR==2 {print $5}' | sed 's/%//')
 if [ "$DISK_USAGE" -gt 80 ]; then
@@ -120,7 +111,7 @@ else
     print_success "Disk usage is healthy (${DISK_USAGE}%)"
 fi
 
-# 9. Check system temperature (if vcgencmd available)
+# Check system temperature (if vcgencmd available)
 print_step "Checking system temperature..."
 if command -v vcgencmd &> /dev/null; then
     TEMP=$(vcgencmd measure_temp | grep -o '[0-9]*\.[0-9]*')
@@ -133,12 +124,12 @@ else
     print_warning "vcgencmd not available (not a Raspberry Pi or GPU drivers not installed)"
 fi
 
-# 10. Check system load
+# Check system load
 print_step "Checking system load..."
 LOAD=$(cat /proc/loadavg | awk '{print $1}')
 print_success "System load: $LOAD"
 
-# 11. Check for security configurations
+# Check for security configurations
 if [ -f /etc/ssh/sshd_config ]; then
     if grep -q "^PermitRootLogin no" /etc/ssh/sshd_config; then
         print_success "SSH root login is disabled"
@@ -149,19 +140,7 @@ else
     print_warning "SSH configuration not found"
 fi
 
-# 12. Check if firewall is active
-print_step "Checking firewall status..."
-if command -v ufw &> /dev/null; then
-    if ufw status | grep -q "active"; then
-        print_success "UFW firewall is active"
-    else
-        print_warning "UFW firewall is not active (consider enabling it)"
-    fi
-else
-    print_warning "UFW firewall not installed"
-fi
-
-# 13. System information
+# System information
 print_step "Gathering system information..."
 echo "" >> "$LOG_FILE"
 echo "System Information:" >> "$LOG_FILE"
@@ -169,7 +148,7 @@ uname -a >> "$LOG_FILE"
 cat /etc/os-release >> "$LOG_FILE"
 echo "" >> "$LOG_FILE"
 
-# 14. Final status
+# Final status
 print_step "Running final checks..."
 if [ $? -eq 0 ]; then
     print_success "All checks completed"
